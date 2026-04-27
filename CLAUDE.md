@@ -154,6 +154,22 @@ Las 10 guías clínicas viven en `data-pipeline/seed-corpus/*.md` (HTA, DM2, ITU
 | Audit log inmutable | login, encounter_created, transcript_updated, documents_generated, document_edited, encounter_signed con IP |
 | Mensaje genérico de login | "Email o contraseña incorrectos" — no revela si el usuario existe |
 
+## Flujo de trabajo Git (Git Flow)
+
+| Branch | Propósito |
+|---|---|
+| `main` | Código en producción / demos. Solo recibe merges desde `release/*` o `hotfix/*`. |
+| `develop` | Branch de integración. Todo el trabajo nuevo se mergea aquí primero. |
+| `feature/<nombre>` | Nuevas features. Salen de `develop`, vuelven a `develop` vía PR. |
+| `release/<vX.Y>` | Estabilización antes de un release. Sale de `develop`, mergea en `main` + `develop`. |
+| `hotfix/<descripcion>` | Bug crítico en prod. Sale de `main`, mergea en `main` + `develop`. |
+
+Convenciones:
+- **Branch activo de trabajo**: `develop`. Nunca commits directos a `main`.
+- Naming: `feature/audio-encryption`, `hotfix/login-rate-limit`, `release/v0.2`.
+- PRs siempre con descripción del cambio, screenshots si toca UI, y test plan.
+- Commits en imperativo presente: "add X", "fix Y", no "added"/"fixed".
+
 ## Reglas de código
 
 1. **Nunca alucinar**: el prompt del LLM exige citar `guideline_id` y `section` exactos del bloque RAG; si no, responde "No documentado".
