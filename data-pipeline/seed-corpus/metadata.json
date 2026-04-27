@@ -1,0 +1,85 @@
+{
+  "_note": "Cada entrada describe una guía clínica generada como ejemplo demostrativo. Cuando lleguen guías oficiales reales, sustituir el archivo .md y poner is_demo=false en el seed.",
+  "guidelines": [
+    {
+      "filename": "hipertension-arterial.md",
+      "title": "Manejo de la Hipertensión Arterial en el Adulto",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "cardiologia",
+      "applicable_areas": ["consulta_externa", "hospitalizacion", "emergencia"]
+    },
+    {
+      "filename": "diabetes-mellitus-tipo-2.md",
+      "title": "Manejo de la Diabetes Mellitus Tipo 2",
+      "institution": "EsSalud-IETSI",
+      "year": 2024,
+      "category": "endocrinologia",
+      "applicable_areas": ["consulta_externa", "hospitalizacion", "emergencia"]
+    },
+    {
+      "filename": "infeccion-tracto-urinario.md",
+      "title": "Infección del Tracto Urinario en el Adulto",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "infectologia",
+      "applicable_areas": ["consulta_externa", "emergencia", "hospitalizacion"]
+    },
+    {
+      "filename": "neumonia-adquirida-comunidad.md",
+      "title": "Neumonía Adquirida en la Comunidad",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "infectologia",
+      "applicable_areas": ["consulta_externa", "emergencia", "hospitalizacion"]
+    },
+    {
+      "filename": "epoc-exacerbacion.md",
+      "title": "Exacerbación Aguda de la EPOC",
+      "institution": "EsSalud-IETSI",
+      "year": 2024,
+      "category": "neumologia",
+      "applicable_areas": ["emergencia", "hospitalizacion", "consulta_externa"]
+    },
+    {
+      "filename": "sindrome-coronario-agudo.md",
+      "title": "Síndrome Coronario Agudo",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "cardiologia",
+      "applicable_areas": ["emergencia", "hospitalizacion"]
+    },
+    {
+      "filename": "control-prenatal.md",
+      "title": "Atención Prenatal en Embarazo de Bajo Riesgo",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "ginecoobstetricia",
+      "applicable_areas": ["consulta_externa", "emergencia"]
+    },
+    {
+      "filename": "anemia-infantil.md",
+      "title": "Anemia por Deficiencia de Hierro en Niños menores de 5 años",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "hematologia_pediatrica",
+      "applicable_areas": ["consulta_externa", "hospitalizacion"]
+    },
+    {
+      "filename": "enfermedad-diarreica-aguda.md",
+      "title": "Enfermedad Diarreica Aguda",
+      "institution": "MINSA",
+      "year": 2024,
+      "category": "gastroenterologia",
+      "applicable_areas": ["emergencia", "consulta_externa", "hospitalizacion"]
+    },
+    {
+      "filename": "cetoacidosis-diabetica.md",
+      "title": "Cetoacidosis Diabética en el Adulto",
+      "institution": "EsSalud-IETSI",
+      "year": 2024,
+      "category": "endocrinologia",
+      "applicable_areas": ["emergencia", "hospitalizacion"]
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[project]
+name = "medicop-backend"
+version = "0.1.0"
+description = "MediCop — Backend API para asistente clínico local"
+requires-python = ">=3.11"
+
+# ── Sprint 0 + 1: dependencias core (instaladas SIEMPRE) ──────────────────────
+# Sin ML pesado — sentence-transformers / whisper / pyannote están en [ml]
+# para evitar arrastrar PyTorch (>3 GB) en el build base
+dependencies = [
+    # Web framework
+    "fastapi>=0.111.0",
+    "uvicorn[standard]>=0.30.0",
+    "python-multipart>=0.0.9",
+
+    # Validación
+    "pydantic>=2.7.0",
+    "pydantic-settings>=2.3.0",
+    "email-validator>=2.0.0",  # requerido por EmailStr en pydantic
+
+    # Base de datos
+    "sqlalchemy[asyncio]>=2.0.30",
+    "alembic>=1.13.0",
+    "asyncpg>=0.29.0",
+
+    # Cache
+    "redis[hiredis]>=5.0.0",
+
+    # Vector DB — cliente ligero, sin PyTorch
+    "qdrant-client>=1.9.0",
+
+    # LLM — cliente HTTP ligero para Ollama
+    "ollama>=0.2.0",
+
+    # Autenticación — bcrypt pinned <5 porque passlib 1.7.4 usa
+    # bcrypt.__about__.__version__ que fue removido en bcrypt 5.0
+    "python-jose[cryptography]>=3.3.0",
+    "passlib>=1.7.4",
+    "bcrypt>=4.0,<5.0",
+
+    # Cifrado AES-256 en reposo
+    "cryptography>=42.0.0",
+
+    # Logging estructurado
+    "structlog>=24.1.0",
+    "python-json-logger>=2.0.7",
+
+    # HTTP client
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+# ── RAG: solo embeddings (sin docling, mantenemos imagen liviana) ─────────────
+rag = [
+    "sentence-transformers>=3.0.0",
+    "docling>=2.0.0",
+]
+
+# ── ML completo (audio + transcripción + diarización) ─────────────────────────
+ml = [
+    "sentence-transformers>=3.0.0",
+    "docling>=2.0.0",
+    "faster-whisper>=1.0.0",
+    "pyannote.audio>=3.1.0",
+]
+
+# ── Demo MVP: lo que el contenedor backend instala por defecto ────────────────
+# Embeddings (RAG) + Whisper (transcripción) — sin pyannote (sin diarización
+# en el MVP demo) ni docling (las guías ya están como Markdown). ~1.2 GB extra.
+demo = [
+    "sentence-transformers>=3.0.0",
+    "faster-whisper>=1.0.0",
+]
+
+# ── Desarrollo y tests ─────────────────────────────────────────────────────────
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "pytest-cov>=5.0.0",
+    "httpx>=0.27.0",
+    "ruff>=0.4.0",
+    "mypy>=1.10.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

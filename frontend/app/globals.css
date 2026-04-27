@@ -1,0 +1,178 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Fuentes cargadas via next/font en layout.tsx — no se importan aquí */
+
+@layer base {
+  :root {
+    /* ── MediCop design tokens ───────────────────────── */
+    --medicop-primary:       #0066B3;
+    --medicop-primary-dark:  #003366;
+    --medicop-primary-light: #E6F2FA;
+    --medicop-accent:        #00A878;
+    --medicop-warning:       #F59E0B;
+    --medicop-danger:        #DC2626;
+    --medicop-bg:            #F4F6F8;
+    --medicop-surface:       #FFFFFF;
+    --medicop-text:          #1A1A1A;
+    --medicop-text-muted:    #6B7280;
+    --medicop-border:        #E5E7EB;
+
+    /* ── shadcn/ui tokens mapeados a paleta MediCop ──── */
+    --background:            210 20% 97%;
+    --foreground:            0 0% 10%;
+    --card:                  0 0% 100%;
+    --card-foreground:       0 0% 10%;
+    --popover:               0 0% 100%;
+    --popover-foreground:    0 0% 10%;
+    --primary:               210 100% 35%;
+    --primary-foreground:    0 0% 100%;
+    --secondary:             210 20% 95%;
+    --secondary-foreground:  210 100% 35%;
+    --muted:                 210 20% 95%;
+    --muted-foreground:      220 9% 44%;
+    --accent:                162 100% 33%;
+    --accent-foreground:     0 0% 100%;
+    --destructive:           0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border:                220 13% 91%;
+    --input:                 220 13% 91%;
+    --ring:                  210 100% 35%;
+    --radius:                0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-medicop-bg text-medicop-text;
+    font-family: var(--font-inter), system-ui, sans-serif;
+  }
+
+  /* Datos clínicos y CIE-10 en JetBrains Mono */
+  .clinical-data,
+  .cie10,
+  code,
+  kbd,
+  pre {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
+
+  /* Scrollbar personalizada */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-medicop-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-medicop-text-muted;
+  }
+
+  /* Selección de texto */
+  ::selection {
+    background-color: #0066B340;
+    color: var(--medicop-text);
+  }
+
+  /* Focus ring consistente */
+  :focus-visible {
+    @apply outline-none ring-2 ring-medicop-primary ring-offset-2;
+  }
+}
+
+@layer components {
+  .medicop-card {
+    @apply bg-medicop-surface border border-medicop-border rounded-xl shadow-sm;
+  }
+
+  .medicop-btn-primary {
+    @apply bg-medicop-primary hover:bg-medicop-primary-dark active:scale-[0.98]
+           text-white font-medium px-4 py-2 rounded-lg transition-all duration-150
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-medicop-primary focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none;
+  }
+
+  .medicop-btn-outline {
+    @apply border border-medicop-border bg-white hover:bg-medicop-primary-light
+           active:scale-[0.98] text-medicop-text font-medium px-4 py-2 rounded-lg
+           transition-all duration-150 focus-visible:outline-none
+           focus-visible:ring-2 focus-visible:ring-medicop-primary focus-visible:ring-offset-2;
+  }
+
+  .medicop-input {
+    @apply w-full border border-medicop-border rounded-lg px-3 py-2.5 text-sm
+           bg-white text-medicop-text placeholder:text-medicop-text-muted
+           focus:outline-none focus:ring-2 focus:ring-medicop-primary focus:border-transparent
+           transition-shadow duration-150;
+  }
+
+  .medicop-label {
+    @apply block text-sm font-medium text-medicop-text mb-1.5;
+  }
+
+  .red-flag-text {
+    @apply text-medicop-danger font-semibold;
+  }
+
+  .disclaimer-banner {
+    @apply bg-amber-50 border border-amber-200 text-amber-800 text-xs p-3 rounded-lg;
+  }
+
+  /* Badge de estado del sistema */
+  .status-badge-ok {
+    @apply inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700
+           border border-emerald-200 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+
+  .status-badge-pending {
+    @apply inline-flex items-center gap-1.5 bg-medicop-primary-light text-medicop-primary
+           border border-blue-200 text-xs font-medium px-2.5 py-1 rounded-full;
+  }
+
+  /* Skeleton loader compartido */
+  .medicop-skeleton {
+    @apply bg-medicop-border/60 rounded animate-pulse;
+  }
+}
+
+/* ─── Animaciones de F4 polish ──────────────────────────────────── */
+
+@keyframes sign-in {
+  0%   { opacity: 0; transform: translateY(8px) scale(0.97); }
+  60%  { opacity: 1; transform: translateY(-2px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+.animate-sign-in {
+  animation: sign-in 480ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.medicop-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(229, 231, 235, 0.4) 0%,
+    rgba(229, 231, 235, 0.8) 50%,
+    rgba(229, 231, 235, 0.4) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}

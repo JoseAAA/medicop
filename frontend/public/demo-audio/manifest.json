@@ -1,0 +1,25 @@
+{
+  "_note": "Audios pre-grabados (gTTS español) para usar como respaldo si el micrófono falla durante la demo. La clave es el NHC (Número de Historia Clínica) del paciente.",
+  "audios": {
+    "0024381": {
+      "filename": "sra-rodriguez-itu.mp3",
+      "label": "Sra. Rodríguez · disuria + control DM2",
+      "transcript_preview": "Doctor, tengo dolor al orinar desde ayer y la glucemia me sale 150 en ayunas..."
+    },
+    "0019472": {
+      "filename": "sr-garcia-control-iam.mp3",
+      "label": "Sr. García · control post-IAM",
+      "transcript_preview": "Doctor, vengo del alta tras el infarto. Sigo tomando aspirina, clopidogrel y atorvastatina..."
+    },
+    "0034001": {
+      "filename": "diego-control-pediatrico.mp3",
+      "label": "Diego · control post-NAC",
+      "transcript_preview": "El niño está mucho mejor desde que terminó la amoxicilina..."
+    },
+    "0028719": {
+      "filename": "sra-castillo-control-itu.mp3",
+      "label": "Sra. Castillo · control post-ITU",
+      "transcript_preview": "Terminé los cinco días de nitrofurantoína la semana pasada..."
+    }
+  }
+}

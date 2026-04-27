@@ -1,0 +1,253 @@
+services:
+
+  # ── Qdrant — Vector DB ───────────────────────────────────────────────────────
+  # RAM: ~256 MB idle; VRAM: 0 (CPU-only index)
+  # Búsqueda HNSW en colecciones pequeñas (<100 guías) es instantánea
+  qdrant:
+    # v1.13+ requerido por query_points API (qdrant-client 1.10+)
+    image: qdrant/qdrant:v1.13.6
+    container_name: medicop-qdrant
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_storage:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 768M
+    # Qdrant no incluye curl/wget — usar bash /dev/tcp para HTTP puro
+    healthcheck:
+      test:
+        - "CMD"
+        - "bash"
+        - "-c"
+        - "exec 3<>/dev/tcp/127.0.0.1/6333 && printf 'GET /readyz HTTP/1.0\\r\\nHost: 127.0.0.1\\r\\n\\r\\n' >&3 && timeout 3 grep -qm1 'ready' <&3"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - medicop-net
+    restart: unless-stopped
+
+  # ── PostgreSQL 16 — Audit logs, usuarios, sesiones ───────────────────────────
+  # RAM: ~80 MB idle; crece con audit log en demo (estimado <200 MB)
+  postgres:
+    image: postgres:16-alpine
+    container_name: medicop-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-medicop}
+      POSTGRES_USER: ${POSTGRES_USER:-medicop}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-medicop_dev_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-medicop} -d ${POSTGRES_DB:-medicop}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - medicop-net
+    restart: unless-stopped
+
+  # ── Redis 7 — Sesiones y rate limiting ──────────────────────────────────────
+  # RAM: maxmemory 150 MB + overhead ~30 MB = ~180 MB total
+  redis:
+    image: redis:7-alpine
+    container_name: medicop-redis
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 150mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - medicop-net
+    restart: unless-stopped
+
+  # ── Ollama — MedGemma 4B Q4_K_M con GPU RTX 3060 ────────────────────────────
+  # VRAM: ~3.2 GB de los 6 GB disponibles → ~90 tok/s
+  # RAM del contenedor: ~800 MB (contexto KV-cache + API overhead; pesos en VRAM)
+  # CPU: tokenización + decodificación de tokens (liviano — GPU hace el forward pass)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: medicop-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_models:/root/.ollama
+    environment:
+      OLLAMA_NUM_PARALLEL: 1        # 1 request a la vez — RTX 3060 no tiene más BW
+      OLLAMA_MAX_LOADED_MODELS: 1   # Solo MedGemma en VRAM
+      OLLAMA_KEEP_ALIVE: "30m"      # Mantiene el modelo caliente durante la demo
+      OLLAMA_FLASH_ATTENTION: "1"   # Flash Attention 2 — reduce VRAM y acelera inferencia
+      # Modelo: medgemma:4b (nombre en Ollama library, internamente Q4_K_M ~3.3 GB VRAM)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+        limits:
+          cpus: "3.0"
+          memory: 1500M
+    # ollama/ollama no incluye curl/wget — bash /dev/tcp para HTTP check
+    healthcheck:
+      test:
+        - "CMD"
+        - "bash"
+        - "-c"
+        - "exec 3<>/dev/tcp/127.0.0.1/11434 && printf 'GET /api/tags HTTP/1.0\\r\\nHost: 127.0.0.1\\r\\n\\r\\n' >&3 && timeout 5 grep -qm1 'models' <&3"
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 20s
+    networks:
+      - medicop-net
+    restart: unless-stopped
+
+  # ── Backend — FastAPI ────────────────────────────────────────────────────────
+  # RAM: ~400 MB base (Python + FastAPI + SQLAlchemy async pool); + ~500 MB cuando
+  # carga Whisper en CPU. Si se pasa Whisper a GPU (large-v3-turbo) suma ~1.5 GB VRAM.
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      target: development
+    container_name: medicop-backend
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-medicop}:${POSTGRES_PASSWORD:-medicop_dev_password}@postgres:5432/${POSTGRES_DB:-medicop}
+      REDIS_URL: redis://redis:6379
+      QDRANT_HOST: qdrant
+      QDRANT_PORT: 6333
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-medgemma:4b}
+      SECRET_KEY: ${SECRET_KEY:-dev_secret_key_change_in_production}
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev_encryption_key_32bytes_long!}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      # Whisper — por defecto small/CPU/int8 (portable a cualquier servidor sin GPU).
+      # Para mejor calidad con GPU: WHISPER_MODEL=large-v3-turbo, COMPUTE_TYPE=float16, DEVICE=cuda
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
+      WHISPER_DEVICE: ${WHISPER_DEVICE:-cpu}
+      WHISPER_COMPUTE_TYPE: ${WHISPER_COMPUTE_TYPE:-int8}
+    volumes:
+      - ./backend:/app
+      # Corpus de guías generadas como ejemplo — el seed lo lee desde aquí
+      - ./data-pipeline/seed-corpus:/app/seed-corpus:ro
+      # Caché de modelos HuggingFace y Whisper persiste entre rebuilds
+      - hf_cache:/root/.cache/huggingface
+      - whisper_cache:/root/.cache/whisper
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      qdrant:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8000/health || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      # Primer arranque: descarga modelo embeddings + carga Whisper + indexa guías.
+      # Después del primer build (cacheado en hf_cache/whisper_cache) baja a ~30 s.
+      start_period: 240s
+    networks:
+      - medicop-net
+    restart: unless-stopped
+
+  # ── Frontend — Next.js 15 ────────────────────────────────────────────────────
+  # RAM: ~500 MB (dev mode con hot reload); producción baja a ~150 MB
+  # node:20-alpine no incluye curl — usar wget
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: development
+    container_name: medicop-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 1G
+    depends_on:
+      backend:
+        condition: service_healthy
+    # node:20-alpine no incluye curl/wget — usar node built-in
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000',r=>{process.exit(r.statusCode<500?0:1)}).on('error',()=>process.exit(1))"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - medicop-net
+    restart: unless-stopped
+
+volumes:
+  qdrant_storage:
+  postgres_data:
+  redis_data:
+  ollama_models:
+  hf_cache:
+  whisper_cache:
+
+networks:
+  medicop-net:
+    driver: bridge
+
+# ── Presupuesto de recursos — RTX 3060 6 GB VRAM + 16 GB RAM ─────────────────
+#
+# VRAM:  MedGemma 4B Q4_K_M ≈ 3.2 GB  (siempre cargado, KEEP_ALIVE 30m)
+#        + Whisper si se sube a GPU large-v3-turbo ≈ 1.5 GB → total ~4.7 / 6.0
+#        Por defecto Whisper corre en CPU (sin VRAM extra).
+#
+# RAM containers (límites):
+#   postgres   512 MB    redis     256 MB    qdrant    768 MB
+#   ollama    1500 MB    backend  1500 MB    frontend 1024 MB
+#   ───────────────────
+#   total     ~5.6 GB → deja ~10 GB libres para SO + buffers
