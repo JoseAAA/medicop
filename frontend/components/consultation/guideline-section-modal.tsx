@@ -2,6 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { BookOpen, X, Loader2, AlertTriangle } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 import { ragApi } from "@/lib/api";
 
@@ -100,13 +102,73 @@ export default function GuidelineSectionModal({
           )}
 
           {data?.section ? (
-            <article className="prose prose-sm max-w-none">
-              <h3 className="font-bold text-medicop-text mb-3">
+            <article className="text-sm text-medicop-text leading-relaxed">
+              <h3 className="font-bold text-medicop-text mb-3 text-base">
                 {data.section.section_title}
               </h3>
-              <pre className="whitespace-pre-wrap break-words text-sm text-medicop-text leading-relaxed font-sans bg-transparent p-0 clinical-data">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // El title ya se muestra arriba — saltamos h2/h1 duplicados.
+                  h1: () => null,
+                  h2: () => null,
+                  h3: ({ children }) => (
+                    <h4 className="font-semibold text-medicop-text mt-4 mb-2">
+                      {children}
+                    </h4>
+                  ),
+                  h4: ({ children }) => (
+                    <h5 className="font-semibold text-medicop-text mt-3 mb-1.5">
+                      {children}
+                    </h5>
+                  ),
+                  p: ({ children }) => (
+                    <p className="mb-3 leading-relaxed">{children}</p>
+                  ),
+                  ul: ({ children }) => (
+                    <ul className="list-disc ml-5 mb-3 space-y-1">{children}</ul>
+                  ),
+                  ol: ({ children }) => (
+                    <ol className="list-decimal ml-5 mb-3 space-y-1">{children}</ol>
+                  ),
+                  li: ({ children }) => (
+                    <li className="leading-relaxed">{children}</li>
+                  ),
+                  strong: ({ children }) => (
+                    <strong className="font-semibold text-medicop-text">{children}</strong>
+                  ),
+                  em: ({ children }) => <em className="italic">{children}</em>,
+                  code: ({ children }) => (
+                    <code className="clinical-data bg-medicop-bg px-1 py-0.5 rounded text-[13px]">
+                      {children}
+                    </code>
+                  ),
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto mb-3">
+                      <table className="min-w-full text-xs border border-medicop-border">
+                        {children}
+                      </table>
+                    </div>
+                  ),
+                  th: ({ children }) => (
+                    <th className="border border-medicop-border px-2 py-1.5 bg-medicop-bg text-left font-semibold">
+                      {children}
+                    </th>
+                  ),
+                  td: ({ children }) => (
+                    <td className="border border-medicop-border px-2 py-1.5 align-top">
+                      {children}
+                    </td>
+                  ),
+                  blockquote: ({ children }) => (
+                    <blockquote className="border-l-2 border-medicop-primary/40 pl-3 italic text-medicop-text-muted my-3">
+                      {children}
+                    </blockquote>
+                  ),
+                }}
+              >
                 {data.section.text}
-              </pre>
+              </ReactMarkdown>
             </article>
           ) : (
             !isLoading &&
