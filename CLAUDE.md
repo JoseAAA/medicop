@@ -19,7 +19,7 @@ El flujo principal: el médico inicia una atención en un área, graba la conver
 
 | Componente | Tecnología | Notas |
 |---|---|---|
-| LLM | `medgemma:4b` (Q4_K_M) vía Ollama | RTX 3060 6 GB — ~3.2 GB VRAM, ~90 tok/s · `OLLAMA_KEEP_ALIVE=30m` · `num_ctx=8192` |
+| LLM | `medgemma1.5:4b` (Q4_K_M) vía Ollama | Google Health AI / Gemma 3 base. Mejor razonamiento clínico de texto + EHR vs `medgemma:4b`. RTX 3060 6 GB — ~3.3 GB VRAM, ~90 tok/s · `OLLAMA_KEEP_ALIVE=30m` · `num_ctx=8192` |
 | Embeddings | `paraphrase-multilingual-MiniLM-L12-v2` (384 dims) | Reemplazó a BGE-M3 — más liviano (~120 MB), CPU-friendly, suficiente para Spanish RAG |
 | Vector DB | Qdrant 1.13.6 | colección `clinical_guidelines`, cosine, IDs determinísticos por SHA1 |
 | Transcripción | Faster-Whisper `small` ES, INT8, CPU | Pre-warmed en lifespan · sin pyannote (diarización omitida en MVP) |
@@ -36,7 +36,7 @@ Todo se opera vía `Makefile`. Los comandos corren dentro de Docker — no hace 
 ```bash
 make install       # instalación end-to-end: setup + pull-models (~10-15 min primera vez)
 make setup         # solo verifica + .env + build + up
-make pull-models   # descarga medgemma:4b en Ollama (~3.3 GB)
+make pull-models   # descarga medgemma1.5:4b en Ollama (~3.3 GB)
 make up            # levanta los 6 servicios
 make up-dev        # con docker-compose.dev.yml (hot reload)
 make down          # detiene

@@ -1,4 +1,4 @@
-.PHONY: install setup up up-dev down down-volumes restart build logs logs-backend logs-frontend logs-qdrant pull-models seed health test lint format type-check shell-backend shell-frontend shell-postgres
+.PHONY: install setup up up-dev down down-volumes restart build logs logs-backend logs-frontend logs-qdrant pull-models seed health lint format type-check shell-backend shell-frontend shell-postgres
 
 # ─── Bootstrap ───────────────────────────────────────────────────────────────
 
@@ -59,9 +59,9 @@ seed:
 	@bash scripts/seed_database.sh
 
 # ─── Tests ───────────────────────────────────────────────────────────────────
-
-test:
-	docker compose exec backend pytest tests/ -v
+# Cuando agregues tests, créalos en backend/tests/ y descomenta el target.
+# test:
+# 	docker compose exec backend pytest tests/ -v
 
 # ─── Calidad de código ───────────────────────────────────────────────────────
 

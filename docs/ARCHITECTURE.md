@@ -16,7 +16,7 @@
 │            ▼                 ▼      ▼               ▼               │
 │   ┌──────────────┐  ┌──────────┐  ┌──────────┐  ┌──────────────┐  │
 │   │   Ollama     │  │  Qdrant  │  │  Redis   │  │ PostgreSQL   │  │
-│   │ MedGemma 4B  │  │ guías ES │  │ sesiones │  │ pacientes,   │  │
+│   │ MedGemma 1.5 │  │ guías ES │  │ sesiones │  │ pacientes,   │  │
 │   │   (GPU)      │  │  + RAG   │  │ + RL +   │  │ encounters,  │  │
 │   │   :11434     │  │  :6333   │  │ blacklist│  │ audit log    │  │
 │   └──────────────┘  └──────────┘  └──────────┘  └──────────────┘  │

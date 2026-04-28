@@ -26,8 +26,9 @@ dependencies = [
     "email-validator>=2.0.0",  # requerido por EmailStr en pydantic
 
     # Base de datos
+    # Sin Alembic: la BD se inicializa con Base.metadata.create_all() en
+    # lifespan. Producción real necesitará migraciones, agregar Alembic ahí.
     "sqlalchemy[asyncio]>=2.0.30",
-    "alembic>=1.13.0",
     "asyncpg>=0.29.0",
 
     # Cache
@@ -57,23 +58,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# ── RAG: solo embeddings (sin docling, mantenemos imagen liviana) ─────────────
-rag = [
-    "sentence-transformers>=3.0.0",
-    "docling>=2.0.0",
-]
-
-# ── ML completo (audio + transcripción + diarización) ─────────────────────────
-ml = [
-    "sentence-transformers>=3.0.0",
-    "docling>=2.0.0",
-    "faster-whisper>=1.0.0",
-    "pyannote.audio>=3.1.0",
-]
-
 # ── Demo MVP: lo que el contenedor backend instala por defecto ────────────────
-# Embeddings (RAG) + Whisper (transcripción) — sin pyannote (sin diarización
-# en el MVP demo) ni docling (las guías ya están como Markdown). ~1.2 GB extra.
+# Embeddings (RAG) + Whisper (transcripción). Las guías ya vienen como
+# Markdown (sin necesidad de docling) y la diarización está fuera de scope
+# del MVP (sin pyannote). ~1.2 GB extra sobre la imagen base.
 demo = [
     "sentence-transformers>=3.0.0",
     "faster-whisper>=1.0.0",

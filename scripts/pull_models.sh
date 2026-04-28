@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-echo "Descargando MedGemma 4B (Q4_K_M)..."
+echo "Descargando MedGemma 1.5 4B (Q4_K_M)..."
 echo "Tamaño aproximado: ~3.3 GB. Puede tomar varios minutos."
 
-docker compose exec ollama ollama pull medgemma:4b
+docker compose exec ollama ollama pull medgemma1.5:4b
 
 echo ""
 echo "Modelos disponibles en Ollama:"

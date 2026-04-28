@@ -107,7 +107,7 @@ services:
       OLLAMA_MAX_LOADED_MODELS: 1   # Solo MedGemma en VRAM
       OLLAMA_KEEP_ALIVE: "30m"      # Mantiene el modelo caliente durante la demo
       OLLAMA_FLASH_ATTENTION: "1"   # Flash Attention 2 — reduce VRAM y acelera inferencia
-      # Modelo: medgemma:4b (nombre en Ollama library, internamente Q4_K_M ~3.3 GB VRAM)
+      # Modelo: medgemma1.5:4b (Google Health AI, Gemma 3 base, Q4_K_M ~3.3 GB VRAM)
     deploy:
       resources:
         reservations:
@@ -150,7 +150,7 @@ services:
       QDRANT_HOST: qdrant
       QDRANT_PORT: 6333
       OLLAMA_BASE_URL: http://ollama:11434
-      OLLAMA_MODEL: ${OLLAMA_MODEL:-medgemma:4b}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-medgemma1.5:4b}
       SECRET_KEY: ${SECRET_KEY:-dev_secret_key_change_in_production}
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-dev_encryption_key_32bytes_long!}
       ENVIRONMENT: ${ENVIRONMENT:-development}
