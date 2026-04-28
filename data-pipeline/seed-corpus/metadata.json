@@ -7,7 +7,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "cardiologia",
-      "applicable_areas": ["consulta_externa", "hospitalizacion", "emergencia"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "diabetes-mellitus-tipo-2.md",
@@ -15,7 +20,12 @@
       "institution": "EsSalud-IETSI",
       "year": 2024,
       "category": "endocrinologia",
-      "applicable_areas": ["consulta_externa", "hospitalizacion", "emergencia"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "infeccion-tracto-urinario.md",
@@ -23,7 +33,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "infectologia",
-      "applicable_areas": ["consulta_externa", "emergencia", "hospitalizacion"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "neumonia-adquirida-comunidad.md",
@@ -31,7 +46,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "infectologia",
-      "applicable_areas": ["consulta_externa", "emergencia", "hospitalizacion"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "epoc-exacerbacion.md",
@@ -39,7 +59,12 @@
       "institution": "EsSalud-IETSI",
       "year": 2024,
       "category": "neumologia",
-      "applicable_areas": ["emergencia", "hospitalizacion", "consulta_externa"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "sindrome-coronario-agudo.md",
@@ -47,7 +72,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "cardiologia",
-      "applicable_areas": ["emergencia", "hospitalizacion"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "control-prenatal.md",
@@ -55,7 +85,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "ginecoobstetricia",
-      "applicable_areas": ["consulta_externa", "emergencia"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "anemia-infantil.md",
@@ -63,7 +98,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "hematologia_pediatrica",
-      "applicable_areas": ["consulta_externa", "hospitalizacion"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "enfermedad-diarreica-aguda.md",
@@ -71,7 +111,12 @@
       "institution": "MINSA",
       "year": 2024,
       "category": "gastroenterologia",
-      "applicable_areas": ["emergencia", "consulta_externa", "hospitalizacion"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     },
     {
       "filename": "cetoacidosis-diabetica.md",
@@ -79,7 +124,12 @@
       "institution": "EsSalud-IETSI",
       "year": 2024,
       "category": "endocrinologia",
-      "applicable_areas": ["emergencia", "hospitalizacion"]
+      "applicable_areas": [
+        "emergencia",
+        "hospitalizacion",
+        "consulta_externa",
+        "cirugia"
+      ]
     }
   ]
 }
