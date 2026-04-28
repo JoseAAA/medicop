@@ -235,6 +235,101 @@ def check_drug_allergy_conflicts(
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Validación anti-alucinación de citas
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+# Strings que el LLM puede generar como placeholder mal-pegado (sin reemplazar).
+_CITATION_PLACEHOLDER_VALUES = {
+    "",
+    "sección",
+    "section",
+    "<copiar>",
+    "<copiar tal cual>",
+    "<copiar del bloque>",
+    "<del bloque>",
+    "...",
+    "…",
+    "n/a",
+}
+
+
+def _validate_citations(
+    citations: list[dict[str, Any]],
+    rag_hits: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Filtra citas que el LLM no pudo respaldar con los hits del RAG.
+
+    Una cita es válida si:
+      1) Su `guideline_id` aparece en los hits que le pasamos al LLM.
+      2) Su `section` coincide (case-insensitive, trimmed) con la sección
+         de algún hit del MISMO `guideline_id`.
+      3) `section` no es un placeholder o cadena vacía.
+
+    Cualquier cita que no cumpla esto se descarta. Esto evita que el LLM
+    invente secciones, copie placeholders del template, o cite guías que
+    no llegaron a verse.
+    """
+    if not citations:
+        return []
+
+    # Indexa hits por guideline_id → set de secciones válidas (lowercase + strip).
+    valid_sections_by_gid: dict[str, set[str]] = {}
+    name_by_gid: dict[str, str] = {}
+    for hit in rag_hits:
+        gid = (hit.get("guideline_id") or "").strip()
+        if not gid:
+            continue
+        section_norm = (hit.get("section") or "").strip().lower()
+        valid_sections_by_gid.setdefault(gid, set()).add(section_norm)
+        if hit.get("guideline_name"):
+            name_by_gid.setdefault(gid, hit["guideline_name"])
+
+    cleaned: list[dict[str, Any]] = []
+    seen: set[tuple[str, str]] = set()
+    for cit in citations:
+        gid = str(cit.get("guideline_id") or "").strip()
+        section_raw = str(cit.get("section") or "").strip()
+        section_norm = section_raw.lower()
+
+        if not gid or section_norm in _CITATION_PLACEHOLDER_VALUES:
+            logger.warning(
+                "citation_dropped_placeholder",
+                guideline_id=gid,
+                section=section_raw,
+            )
+            continue
+
+        valid_sections = valid_sections_by_gid.get(gid)
+        if valid_sections is None:
+            logger.warning("citation_dropped_unknown_guideline", guideline_id=gid)
+            continue
+
+        if section_norm not in valid_sections:
+            logger.warning(
+                "citation_dropped_unknown_section",
+                guideline_id=gid,
+                section=section_raw,
+                valid_sections=sorted(valid_sections),
+            )
+            continue
+
+        key = (gid, section_norm)
+        if key in seen:
+            continue
+        seen.add(key)
+
+        # Reemplaza el guideline_name por el del RAG (el del LLM puede venir mal).
+        cleaned.append({
+            "guideline_id": gid,
+            "guideline_name": name_by_gid.get(gid, cit.get("guideline_name", "")),
+            "section": section_raw,
+        })
+
+    return cleaned
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Persistencia de documentos
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -392,7 +487,22 @@ async def generate_documents_for_encounter(
 
     assert llm_output is not None, "Bug: llm_output no debería ser None aquí"
 
-    # 4) Chequeo de alergias (independiente del LLM)
+    # 4a) Validación anti-alucinación de citas: descarta cualquier cita cuyo
+    #     guideline_id o section no aparezcan en los hits que recibió el LLM.
+    #     Esto previene placeholders mal pegados ("Sección"), guías inventadas
+    #     o secciones que el modelo confundió.
+    raw_citations = llm_output.get("citations") or []
+    valid_citations = _validate_citations(raw_citations, hits)
+    llm_output["citations"] = valid_citations
+    if len(valid_citations) < len(raw_citations):
+        logger.info(
+            "citations_filtered",
+            encounter_id=encounter.id,
+            received=len(raw_citations),
+            kept=len(valid_citations),
+        )
+
+    # 4b) Chequeo de alergias (independiente del LLM)
     rx = llm_output.get("prescription") or {}
     drugs = rx.get("drugs") or []
     allergy_flags = check_drug_allergy_conflicts(drugs, list(patient.allergies or []))

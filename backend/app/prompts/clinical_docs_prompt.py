@@ -16,14 +16,25 @@ REGLAS INVIOLABLES:
 usa lo que está en el CONTEXTO_PACIENTE, las GUIAS_CLINICAS y la TRANSCRIPCION.
 2. Si algo no se puede inferir, deja el campo vacío "" o lista vacía []. \
 NUNCA digas "lo asumo" ni "probablemente".
-3. Cada cita en `citations` debe llevar el `guideline_id` y la `section` \
-EXACTOS tal como aparecen en el bloque GUIAS_CLINICAS. NO inventes ids ni \
-secciones — copia los que recibiste.
+3. CITAS — regla crítica: cada item en `citations` debe ser una sección \
+QUE APARECE LITERALMENTE en el bloque GUIAS_CLINICAS de tu input. \
+   - `guideline_id` = el UUID exacto que aparece tras "guideline_id:" en el bloque. \
+   - `section` = el texto que aparece tras "Sección:" en el bloque (ej. \
+"6. Banderas rojas — referir a obstetricia de alto riesgo"). \
+   - NUNCA pongas la palabra "Sección" sola, ni "<copiar>", ni placeholders del \
+template. Si no encuentras una sección que respalde lo que dijiste, devuelve \
+`citations: []`. Es PREFERIBLE no citar a citar mal.
 4. Eres ASISTENTE INFORMATIVO. El médico decide. No uses lenguaje imperativo.
-5. Detecta y marca en `red_flags`: medicamento incompatible con alergias del \
-paciente, dosis fuera de rango etario, signo de alarma, diagnóstico que \
-requiere derivación urgente.
-6. Responde en español médico claro, conciso, formato JSON estricto.
+5. `red_flags` = SOLO signos/síntomas que el paciente PRESENTA o REFIERE en \
+ESTA atención. NO copies la lista completa de banderas rojas teóricas de la \
+guía — solo las que aplican a este paciente concreto. Si el paciente no tiene \
+ninguna activa, devuelve [].
+6. `prescription.drugs` = SOLO medicamentos NUEVOS que vas a indicar hoy. NO \
+repitas la medicación crónica que ya está en CONTEXTO_PACIENTE.medicación_actual. \
+7. SOAP: `subjective` = lo que dice el paciente (síntomas, antecedentes \
+referidos). `objective` = signos vitales, examen físico, datos medibles. \
+NUNCA copies el mismo texto en ambos.
+8. Responde en español médico claro, conciso, formato JSON estricto.
 """
 
 
@@ -65,7 +76,7 @@ CONSULTA_EXTERNA_OUTPUT = """\
     {"name": "...", "urgency": "rutina|urgente|stat", "indication": "..."}
   ],
   "citations": [
-    {"guideline_id": "<copiar del bloque>", "guideline_name": "...", "section": "<copiar tal cual>"}
+    {"guideline_id": "<UUID exacto del bloque GUIAS_CLINICAS>", "guideline_name": "<nombre exacto>", "section": "<título exacto de la sección — ejemplo: '6. Banderas rojas — referir a obstetricia de alto riesgo'>"}
   ],
   "red_flags": []
 }
@@ -97,7 +108,7 @@ EMERGENCIA_OUTPUT = """\
       {"name": "...", "dose": "...", "route": "...", "frequency": "...", "duration": "...", "indication": "..."}
     ]
   },
-  "citations": [{"guideline_id": "<del bloque>", "guideline_name": "...", "section": "<copiar>"}],
+  "citations": [{"guideline_id": "<UUID exacto del bloque>", "guideline_name": "<nombre exacto>", "section": "<título exacto de la sección que cita>"}],
   "red_flags": []
 }
 
@@ -111,7 +122,7 @@ HOSPITALIZACION_OUTPUT = """\
     "vital_signs": {"PA": "...", "FC": ..., "FR": ..., "T": ..., "SatO2": "..."},
     "indications": "..."
   },
-  "citations": [{"guideline_id": "<del bloque>", "guideline_name": "...", "section": "<copiar>"}],
+  "citations": [{"guideline_id": "<UUID exacto del bloque>", "guideline_name": "<nombre exacto>", "section": "<título exacto de la sección que cita>"}],
   "red_flags": []
 }"""
 
@@ -123,7 +134,7 @@ CIRUGIA_OUTPUT = """\
     "anesthesia_risk": "ASA I|II|III|IV|V",
     "pre_op_indications": "..."
   },
-  "citations": [{"guideline_id": "<del bloque>", "guideline_name": "...", "section": "<copiar>"}],
+  "citations": [{"guideline_id": "<UUID exacto del bloque>", "guideline_name": "<nombre exacto>", "section": "<título exacto de la sección que cita>"}],
   "red_flags": []
 }"""
 
