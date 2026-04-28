@@ -29,9 +29,10 @@ class Settings(BaseSettings):
     embedding_dim: int = 384
 
     ollama_base_url: str = "http://ollama:11434"
-    # medgemma:4b — modelo oficial en Ollama library (~3.3 GB, cuantización Q4_K_M)
-    # RTX 3060 6 GB VRAM: cabe completo → ~90 tok/s vs ~20 tok/s en CPU
-    ollama_model: str = "medgemma:4b"
+    # medgemma1.5:4b — Google Health AI (Gemma 3 base, ~3.3 GB Q4_K_M).
+    # Mejor razonamiento clínico de texto + EHR vs medgemma:4b.
+    # RTX 3060 6 GB VRAM: cabe completo → ~90 tok/s vs ~20 tok/s en CPU.
+    ollama_model: str = "medgemma1.5:4b"
     ollama_timeout: int = 120
 
     secret_key: str = "dev_secret_key_change_in_production"

@@ -10,7 +10,7 @@ HIS con IA para hospitales peruanos. El médico graba la conversación con el pa
 
 ## Quick Start
 
-Un solo comando — el script verifica Docker, genera claves seguras automáticamente, construye las imágenes, levanta los 6 servicios y descarga el modelo MedGemma 4B (~3.3 GB).
+Un solo comando — el script verifica Docker, genera claves seguras automáticamente, construye las imágenes, levanta los 6 servicios y descarga el modelo MedGemma 1.5 4B (~3.3 GB).
 
 ```bash
 git clone <repo> medicop && cd medicop
@@ -21,7 +21,7 @@ Tras 10-15 minutos (la primera vez) está todo listo. Si prefieres dividir pasos
 
 ```bash
 make setup         # solo verifica Docker + .env + build + up
-make pull-models   # descarga MedGemma 4B aparte
+make pull-models   # descarga MedGemma 1.5 4B aparte
 ```
 
 | URL | Descripción |
@@ -57,7 +57,7 @@ make pull-models   # descarga MedGemma 4B aparte
 
 | Componente | Tecnología |
 |---|---|
-| LLM | MedGemma 4B (Q4_K_M) vía Ollama, GPU |
+| LLM | MedGemma 1.5 4B (Q4_K_M) vía Ollama, GPU |
 | Embeddings RAG | MiniLM multilingüe (CPU, ~120 MB) |
 | Vector DB | Qdrant 1.13 |
 | Transcripción | Faster-Whisper `small` español, INT8, CPU |
@@ -96,7 +96,7 @@ make up / down     # levantar / detener servicios
 make logs          # logs en tiempo real (logs-backend / logs-frontend / logs-qdrant)
 make health        # /health del backend
 make seed          # re-siembra demo (idempotente)
-make pull-models   # descargar MedGemma 4B (~3.3 GB)
+make pull-models   # descargar MedGemma 1.5 4B (~3.3 GB)
 make test          # pytest
 make lint          # ruff (backend) + next lint (frontend)
 make format        # ruff format + ruff --fix
